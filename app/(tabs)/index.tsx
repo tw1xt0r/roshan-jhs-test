@@ -1,70 +1,87 @@
-import { Image, StyleSheet, Platform } from 'react-native';
-
-import { HelloWave } from '@/components/HelloWave';
-import ParallaxScrollView from '@/components/ParallaxScrollView';
-import { ThemedText } from '@/components/ThemedText';
-import { ThemedView } from '@/components/ThemedView';
+import { StyleSheet, TouchableOpacity, View, Text, ScrollView } from 'react-native';
+import { useState } from 'react';
 
 export default function HomeScreen() {
+  const [backgroundColor, setBackgroundColor] = useState<string>('#ffffff');
+  const [tapCount, setTapCount] = useState<number>(0);
+  const [colorHistory, setColorHistory] = useState<string[]>([]);
+
+  const generateRandomColor = (): string => {
+    const letters = '0123456789ABCDEF';
+    let color = '#';
+    for (let i = 0; i < 6; i++) {
+      color += letters[Math.floor(Math.random() * 16)];
+    }
+    return color;
+  };
+
+  const handlePress = (): void => {
+    const newColor = generateRandomColor();
+    setBackgroundColor(newColor);
+    setTapCount(tapCount + 1);
+    setColorHistory([newColor, ...colorHistory]);
+  };
+
+  const applyColorFromHistory = (color: string): void => {
+    setBackgroundColor(color);
+  };
+
   return (
-    <ParallaxScrollView
-      headerBackgroundColor={{ light: '#A1CEDC', dark: '#1D3D47' }}
-      headerImage={
-        <Image
-          source={require('@/assets/images/partial-react-logo.png')}
-          style={styles.reactLogo}
-        />
-      }>
-      <ThemedView style={styles.titleContainer}>
-        <ThemedText type="title">Welcome!</ThemedText>
-        <HelloWave />
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <ThemedText type="subtitle">Step 1: Try it</ThemedText>
-        <ThemedText>
-          Edit <ThemedText type="defaultSemiBold">app/(tabs)/index.tsx</ThemedText> to see changes.
-          Press{' '}
-          <ThemedText type="defaultSemiBold">
-            {Platform.select({ ios: 'cmd + d', android: 'cmd + m' })}
-          </ThemedText>{' '}
-          to open developer tools.
-        </ThemedText>
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <ThemedText type="subtitle">Step 2: Explore</ThemedText>
-        <ThemedText>
-          Tap the Explore tab to learn more about what's included in this starter app.
-        </ThemedText>
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <ThemedText type="subtitle">Step 3: Get a fresh start</ThemedText>
-        <ThemedText>
-          When you're ready, run{' '}
-          <ThemedText type="defaultSemiBold">npm run reset-project</ThemedText> to get a fresh{' '}
-          <ThemedText type="defaultSemiBold">app</ThemedText> directory. This will move the current{' '}
-          <ThemedText type="defaultSemiBold">app</ThemedText> to{' '}
-          <ThemedText type="defaultSemiBold">app-example</ThemedText>.
-        </ThemedText>
-      </ThemedView>
-    </ParallaxScrollView>
+    <View style={[styles.container, { backgroundColor }]}>
+      <TouchableOpacity style={styles.touchableArea} onPress={handlePress}>
+        <View style={styles.content}>
+          <Text style={styles.text}>Hello there</Text>
+          <Text style={styles.tapCount}>Tap Count: {tapCount}</Text>
+        </View>
+      </TouchableOpacity>
+      <ScrollView style={styles.historyContainer} horizontal>
+        {colorHistory.map((color, index) => (
+          <TouchableOpacity
+            key={index}
+            style={[styles.historyItem, { backgroundColor: color }]}
+            onPress={() => applyColorFromHistory(color)}
+          />
+        ))}
+      </ScrollView>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
-  titleContainer: {
-    flexDirection: 'row',
+  container: {
+    flex: 1,
+    justifyContent: 'center',
     alignItems: 'center',
-    gap: 8,
   },
-  stepContainer: {
-    gap: 8,
-    marginBottom: 8,
+  touchableArea: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    width: '100%',
   },
-  reactLogo: {
-    height: 178,
-    width: 290,
-    bottom: 0,
-    left: 0,
+  content: {
+    alignItems: 'center',
+  },
+  text: {
+    fontSize: 24,
+    fontWeight: 'bold',
+  },
+  tapCount: {
+    marginTop: 10,
+    fontSize: 16,
+    color: '#666',
+  },
+  historyContainer: {
     position: 'absolute',
+    bottom: 20,
+    paddingHorizontal: 10,
+  },
+  historyItem: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    marginHorizontal: 5,
+    borderWidth: 1,
+    borderColor: '#ccc',
   },
 });
